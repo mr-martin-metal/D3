@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+	    <title>UK Temperature History</title>
+	    <link rel="stylesheet" href="css/reset.css">
+	    <link rel="stylesheet" href="css/style.css">
+	    <script src="js/modernizr.js"></script>
+	</head>
+
+	<body>
+		<div id="chart">
+			<svg>
+			</svg>
+		</div>
+		<div id="widgets">
+			<div id="header">
+				<h1>WAL Files Chronicles</h1>
+				<p>Explore the WAL files creation frequency for PostgreSQL databse under AC product in Amstelveen by scrolling the page <span class="emphasis">up</span> and <span class="emphasis">down</span></p>
+			</div>
+			<div id="menu">
+			</div>
+			<div id="info">
+			</div>
+			<div id="footer">
+				<p>Chart created by Martin Metal based on data extracted from the data center in AM2. </p>
+			</div>
+		</div>
+
+		<script src="js/jquery-1.10.2.min.js"></script>
+		<script src="js/d3.v3.min.js"></script>
+		<script src="js/underscore-min.js"></script>
+    <script type="text/javascript">
+      Modernizr.load({
+        test: Modernizr.svg,
+        yep: 'js/wals.js',
+        nope: ['js/jquery-1.10.2.min.js', 'js/fallback.js']
+      });
+    </script>
+	</body>
+</html>
