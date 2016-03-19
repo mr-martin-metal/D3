@@ -5,6 +5,8 @@ var chart = {
 	yScale: null,
 	svgLine: null,
 	colorScale: null,
+	scrollTimer: null,
+	lastScrollFireTime : null,
 
 	perspectiveOffsetX: 5,
 	perspectiveOffsetY: 4.5,
@@ -131,8 +133,65 @@ var chart = {
 			.html(html);
 	},
 
+	handleScrollThrottled: function() {
+		var minScrollTime = 600;
+		var now = new Date().getTime();
+		var that = chart;
+
+		function processScroll() {
+			console.log(new Date().getTime().toString());
+			if(that.uiState.sorting) return;
+			that.scroll[1] = $(window).scrollTop();
+			if(that.scroll[0] == that.scroll[1]) return;
+			if( that.scroll[0] < that.scroll[1]) {
+				if( that.uiState.selectedIndex < that.data.itemCount ) {
+					that.uiState.selectedIndex += 1;
+				}
+			} else {
+				if( that.uiState.selectedIndex > 0 ) {
+					that.uiState.selectedIndex -= 1;
+				}
+			}
+			if( that.scroll[1] > parseInt((that.bodyHeight - ( that.bodyHeight * 0.25 )),10) ) {
+				$(window).scrollTop(4000);
+				if( that.uiState.selectedIndex < that.data.itemCount ) {
+					that.uiState.selectedIndex += 1;
+				}
+			}
+
+			console.log("selectedIndex=", that.uiState.selectedIndex );
+			console.log("Scroll 0 / 1", that.scroll[0], that.scroll[1]);
+			that.scroll[0] = that.scroll[1];
+			that.updateVisibleYears();
+		}
+
+		if (!this.scrollTimer) {
+			if (now - this.lastScrollFireTime > (3 * minScrollTime)) {
+				processScroll();   // fire immediately on first scroll
+				this.lastScrollFireTime = now;
+			}
+			this.scrollTimer = setTimeout(function() {
+				this.scrollTimer = null;
+				this.lastScrollFireTime = new Date().getTime();
+				processScroll();
+			}, minScrollTime);
+		}
+	},
+
 	handleScroll: function() {
 		var that = chart; // Better way to do this?
+
+		function reRegister(e) {
+			$(window).on('scroll', e );
+		}
+
+		$(window).off('scroll', that.handleScroll);
+//		_.delay( reRegister(that.handleScroll), 200 );
+		this.scrollTimer = setTimeout(function() {
+			this.scrollTimer = null;
+			reRegister(that.handleScroll);
+		}, 300);
+
 		if(that.uiState.sorting) return;
 		that.scroll[1] = $(window).scrollTop();
 		//		var newIndex = Math.round(that.scrollScale(scroll));
@@ -162,7 +221,9 @@ var chart = {
 
 	initEvents: function() {
 		var that = this;
+//		$(window).scroll(_.debounce(this.handleScroll, 80));
 		$(window).scroll(this.handleScroll);
+//		$(window).scroll(this.handleScrollThrottled);
 		$(window).on('touchmove', this.handleScroll);
 	},
 
