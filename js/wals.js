@@ -194,7 +194,7 @@ var chart = {
 
 		if(that.uiState.sorting) return;
 		that.scroll[1] = $(window).scrollTop();
-		//		var newIndex = Math.round(that.scrollScale(scroll));
+		//		that.uiState.selectedIndex = Math.round(that.scrollScale(scroll));
 		//		console.log("scroll=",scroll);
 		//		console.log("oldIndex - newIndex", that.uiState.selectedIndex, newIndex );
 		if( that.scroll[0] < that.scroll[1]) {
