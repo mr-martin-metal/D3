@@ -133,6 +133,13 @@ var chart = {
 			.html(html);
 	},
 
+	/* Throttled handling. The fucntion executes immediately but then 
+	 * deboubces the other incomming inout and prevent handling
+	 * of the scroll commands. First after the debounce interval
+	 * expires, the next handling is allowed. It is time bound, and doe not have
+	 * proportional or derivative component. Therefore is the response 
+	 * not optimal 
+	 */
 	handleScrollThrottled: function() {
 		var minScrollTime = 600;
 		var now = new Date().getTime();
@@ -178,19 +185,33 @@ var chart = {
 		}
 	},
 
-	handleScroll: function() {
+	/* Throttled handler. 
+	 * This throttling incorporates proportonal and derivative component
+	 * into time limitted trottling. It works a little better that the 
+	 * statically configured throttling function but still does not bring
+	 * the adequate responsivnes. Perhaps a better set of tuning constants for
+	 * proportional and derivative components can bring better results.
+	 */
+	handleScrollThrottled_ex: function() {
 		var that = chart; // Better way to do this?
+		var interval, delay;
 
 		function reRegister(e) {
 			$(window).on('scroll', e );
 		}
 
-		$(window).off('scroll', that.handleScroll);
+		$(window).off('scroll', that.handleScrollThrottled_ex);
+
+		that.scroll[1] = $(window).scrollTop();
+		interval = Math.ceil(Math.abs(that.scroll[0] - that.scroll[1])/ 80);
+		delay = Math.floor(500 / (interval*interval));
+		console.log("Calculated delay=", delay);
+
 //		_.delay( reRegister(that.handleScroll), 200 );
 		this.scrollTimer = setTimeout(function() {
 			this.scrollTimer = null;
-			reRegister(that.handleScroll);
-		}, 300);
+			reRegister(that.handleScrollThrottled_ex);
+		}, delay);
 
 		if(that.uiState.sorting) return;
 		that.scroll[1] = $(window).scrollTop();
@@ -214,7 +235,85 @@ var chart = {
 		}
 
 		console.log("selectedIndex=", that.uiState.selectedIndex );
-		console.log("Scroll 0 / 1", that.scroll[0], that.scroll[1]);
+		console.log("Scroll 0 / 1", that.scroll[0], that.scroll[1], Math.abs(that.scroll[0] - that.scroll[1]));
+		that.scroll[0] = that.scroll[1];
+		that.updateVisibleYears();
+	},
+
+	/* Throttled handler
+	 * This handler is much simpler compared to the previous one and relies on
+	 * properties of the "event" fired by tye browser. The evetn itself is supposed
+	 * to bring the proportional and derivative acceleration components. The handler
+	 * just gets the output. Typically, the Edge and Chromium fires once per mouse
+	 * scroll evetn and the amount of chnage they send depends on the used mouse. 
+	 * I measure 53 for my mouse. Firefox however sends multiple events "during" the
+	 * wheel still moves and first the cummulative envent totals "53" for the same mouse.
+	 * This throttling cummulates the chnage until it reaces level 53, then it triggers
+	 * the chnage in the display
+	 */
+	handleScrollCustom: function() {
+		var that = chart; // Better way to do this?
+
+		if(that.uiState.sorting) return;
+		that.scroll[1] = $(window).scrollTop();
+		//		that.uiState.selectedIndex = Math.round(that.scrollScale(scroll));
+		//		console.log("scroll=",scroll);
+		//		console.log("oldIndex - newIndex", that.uiState.selectedIndex, newIndex );
+		that.scroll[2] += Math.abs(that.scroll[1] - that.scroll[0]); 
+		if( that.scroll[0] < that.scroll[1]) {
+			if( (that.uiState.selectedIndex < that.data.itemCount) && ( that.scroll[2] > 52 ) ) {
+				that.uiState.selectedIndex += 1;
+				that.scroll[2] = 0;
+			}
+		} else {
+			if( (that.uiState.selectedIndex > 0) && ( that.scroll[2] > 52 ) ) {
+				that.uiState.selectedIndex -= 1;
+				that.scroll[2] = 0;
+			}
+		}
+		if( that.scroll[1] > parseInt((that.bodyHeight - ( that.bodyHeight * 0.25 )),10) ) {
+			$(window).scrollTop(4000);
+			if( that.uiState.selectedIndex < that.data.itemCount ) {
+				that.uiState.selectedIndex += 1;
+			}
+		}
+
+		console.log("selectedIndex=", that.uiState.selectedIndex );
+		console.log("Scroll 0 - 1 = ", that.scroll[0], that.scroll[1], Math.abs(that.scroll[0] - that.scroll[1]));
+		that.scroll[0] = that.scroll[1];
+		that.updateVisibleYears();
+	},
+
+	/* Original handler. 
+	 * Does not throttle the scroll event. It works fine on Chromium
+	 * but is failing on other browsers.
+	 */
+	handleScroll: function() {
+		var that = chart; // Better way to do this?
+
+		if(that.uiState.sorting) return;
+		that.scroll[1] = $(window).scrollTop();
+		//		that.uiState.selectedIndex = Math.round(that.scrollScale(scroll));
+		//		console.log("scroll=",scroll);
+		//		console.log("oldIndex - newIndex", that.uiState.selectedIndex, newIndex );
+		if( that.scroll[0] < that.scroll[1]) {
+			if( that.uiState.selectedIndex < that.data.itemCount ) {
+				that.uiState.selectedIndex += 1;
+			}
+		} else {
+			if( that.uiState.selectedIndex > 0 ) {
+				that.uiState.selectedIndex -= 1;
+			}
+		}
+		if( that.scroll[1] > parseInt((that.bodyHeight - ( that.bodyHeight * 0.25 )),10) ) {
+			$(window).scrollTop(4000);
+			if( that.uiState.selectedIndex < that.data.itemCount ) {
+				that.uiState.selectedIndex += 1;
+			}
+		}
+
+		console.log("selectedIndex=", that.uiState.selectedIndex );
+		console.log("Scroll 0 - 1 = ", that.scroll[0], that.scroll[1], Math.abs(that.scroll[0] - that.scroll[1]));
 		that.scroll[0] = that.scroll[1];
 		that.updateVisibleYears();
 	},
@@ -222,17 +321,20 @@ var chart = {
 	initEvents: function() {
 		var that = this;
 //		$(window).scroll(_.debounce(this.handleScroll, 80));
-		$(window).scroll(this.handleScroll);
+//		$(window).scroll(this.handleScroll);
+		$(window).scroll(this.handleScrollCustom);
 //		$(window).scroll(this.handleScrollThrottled);
+//		$(window).scroll(this.handleScrollThrottled_ex);
 		$(window).on('touchmove', this.handleScroll);
 	},
 
 	initChart: function() {
 		var that = this;
 
-		this.scroll=[2];
-		this.scroll[0] = 0;
-		this.scroll[1] = 0;
+		this.scroll=[3];
+		this.scroll[0] = 0; // old scroll position
+		this.scroll[1] = 0; // latest scroll position
+		this.scroll[2] = 0; // difference counter
 		this.xScale = d3.scale.linear()
 			.domain([0, 23])
 			.range([0, this.lineWidth]);

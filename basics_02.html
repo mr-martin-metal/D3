@@ -4,12 +4,27 @@
 		<meta charset="utf-8">
 		<title>D3: Creating paragraphs dynamically from data</title>
 		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+		<style>
+			.axis path,
+			.axis line {
+			    fill: none;
+			    stroke: gray;
+			    shape-rendering: crispEdges;
+			}
+
+			.axis text {
+			    font-family: sans-serif;
+			    font-size: 11px;
+			}
+		</style>
 	</head>
 	<body>
 		<script type="text/javascript">
 	
 			var	w="680",
-					h="100";
+					h="200",
+					padding=25,
+					padding_right=45;
 
 			var dataset = [ 
                   [ 5,     20 ],
@@ -21,6 +36,7 @@
                   [ 475,   44 ],
                   [ 25,    67 ],
                   [ 85,    21 ],
+                  [ 600,  100 ],
                   [ 220,   88 ]
               ];
 
@@ -49,17 +65,33 @@
 			var xScale = d3.scale
 								.linear()
                      	.domain([0, d3.max(dataset, function(d) { return d[0]; })])
-                     	.range([0+15, w-15]);
+                     	.range([0+padding, w-padding_right])
+								.nice();
 
 			var yScale = d3.scale
 								.linear()
+                     	.domain([0, d3.max(dataset, function(d) { return d[1];})])
+                     	.range([h-padding,0+padding])
+								.nice();
+
+			// Custom scalling for the diameter of the circle drawn in the chart
+			var rScale = d3.scale.linear()
                      	.domain([0, d3.max(dataset, function(d) { return d[1]; })])
-                     	.range([0+15, h-15]);
+                     	.range([8, 2]);
 
 			var svg = d3.select("body")
             .append("svg")
             .attr("width", w)
             .attr("height", h);
+
+			var xAxis = d3.svg.axis()
+                  .scale(xScale)
+                  .orient("bottom"); // orientation of the ticks on the generated axis
+
+			var yAxis = d3.svg.axis()
+                  .scale(yScale)
+                  .orient("left")
+                  .ticks(5);
 
 			// Build scatter chart. Agg SVG circle objects to a SVG canvas. Add
 			// so many circles, as many entries exist in the data container.
@@ -74,7 +106,7 @@
         			return yScale(d[1]);
    			})
 				.attr("r", function(d) {
-	  				return Math.sqrt(h - d[1]);
+	  				return rScale(d[1]);
 			});
 
 			// Each "buble" in the scatter chart gets the label with its position
@@ -94,6 +126,17 @@
 			   .attr("font-family", "sans-serif")
 			   .attr("font-size", "11px")
 			   .attr("fill", "rgba(200,128,0,0.8)" );
+
+			// Append the axis to the SVG chart:
+			svg.append("g")
+				.attr("class","axis") // style the axis via a referred CSS and dedicated class
+				.attr("transform", "translate(0," + (h - padding) + ")") // move the axix from top part of the SVG into bottom!
+				.call(xAxis);
+
+			svg.append("g")
+				.attr("class","axis") // style the axis via a referred CSS and dedicated class
+				.attr("transform", "translate(" + padding + ",0)")
+				.call(yAxis);
 			
 		</script>
 	</body>
