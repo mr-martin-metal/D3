@@ -94,7 +94,8 @@
                   .ticks(5);
 
 			// Build scatter chart. Agg SVG circle objects to a SVG canvas. Add
-			// so many circles, as many entries exist in the data container.
+			// so many circles, as many entries exist in the data container. After binding 
+			// the data, enter() must be called
 			svg.selectAll("circle")  // <-- No longer "rect"
    			.data(dataset)
    			.enter()

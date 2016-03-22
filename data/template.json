@@ -1,4 +1,5 @@
 	"info": { 
-"2016-02-01": {"class":"hot", "text":"<p>We reconfigured AC to purge the buffers completely every hour.</p>"}
+"2016-02-01": {"class":"hot", "text":"<p>We reconfigured AC to purge the buffers completely every hour.</p>"},
+"2016-02-08": {"class":"cold", "text":"<p>The data is missing for this date. The data extractor was failing.</p>"}
  	}
 }

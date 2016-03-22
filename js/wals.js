@@ -348,7 +348,8 @@ var chart = {
 			.range([1, 0.5]);
 
 		this.svgLine = d3.svg.line()
-			.interpolate('cardinal')
+			//.interpolate('cardinal')
+			.interpolate('monotone')
 			.x(function(d, i) {return that.xScale(i);})
 			.y(function(d) {return that.yScale(d);});
 
@@ -367,9 +368,9 @@ var chart = {
 			.attr('transform', function(d, i) {
 				return that.translate(i * that.perspectiveOffsetX, -i * that.perspectiveOffsetY);
 			})
-		.style('opacity', function(d, i) {
-			return that.colorScale(i);
-		});
+			.style('opacity', function(d, i) {
+				return that.colorScale(i);
+			});
 
 		// Add paths
 		years
