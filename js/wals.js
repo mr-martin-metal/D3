@@ -273,10 +273,27 @@ var chart = {
 			}
 		}
 		if( that.scroll[1] > parseInt((that.bodyHeight - ( that.bodyHeight * 0.25 )),10) ) {
-			$(window).scrollTop(4000);
+			/*
 			if( that.uiState.selectedIndex < that.data.itemCount ) {
 				that.uiState.selectedIndex += 1;
 			}
+			*/
+			$(window).off('scroll', that.handleScrollCustom);
+			$(window).scrollTop(4000);
+			that.scroll[1]=4000;
+			this.scrollTimer = setTimeout(function() {
+				this.scrollTimer = null;
+				$(window).on('scroll', that.handleScrollCustom);
+			}, 30);
+		}
+		if( (that.scroll[1] < 53) && (that.uiState.selectedIndex > 0)) {
+			$(window).off('scroll', that.handleScrollCustom);
+			$(window).scrollTop(57);
+			that.scroll[1]=57;
+			this.scrollTimer = setTimeout(function() {
+				this.scrollTimer = null;
+				$(window).on('scroll', that.handleScrollCustom);
+			}, 30);
 		}
 
 		console.log("selectedIndex=", that.uiState.selectedIndex );
