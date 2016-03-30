@@ -133,12 +133,13 @@ var chart = {
 			.html(html);
 	},
 
-	/* Throttled handling. The fucntion executes immediately but then 
-	 * deboubces the other incomming inout and prevent handling
-	 * of the scroll commands. First after the debounce interval
-	 * expires, the next handling is allowed. It is time bound, and doe not have
-	 * proportional or derivative component. Therefore is the response 
-	 * not optimal 
+	/* Throttled handling. 
+	 * The function executes immediately but then 
+	 * de-bounces the other incoming input and prevent handling
+	 * of the scroll commands. First after the de-bounce interval
+	 * expires, the next handling is allowed. It is time interval driven, 
+	 * and does not have proportional or derivative component. 
+	 * Therefore is the response not optimal 
 	 */
 	handleScrollThrottled: function() {
 		var minScrollTime = 600;
@@ -186,10 +187,10 @@ var chart = {
 	},
 
 	/* Throttled handler. 
-	 * This throttling incorporates proportonal and derivative component
-	 * into time limitted trottling. It works a little better that the 
+	 * This throttling incorporates proportional and derivative component
+	 * into time limited throttling. It works a little better that the 
 	 * statically configured throttling function but still does not bring
-	 * the adequate responsivnes. Perhaps a better set of tuning constants for
+	 * the adequate responsiveness. Perhaps a better set of tuning constants for
 	 * proportional and derivative components can bring better results.
 	 */
 	handleScrollThrottled_ex: function() {
@@ -242,14 +243,14 @@ var chart = {
 
 	/* Throttled handler
 	 * This handler is much simpler compared to the previous one and relies on
-	 * properties of the "event" fired by tye browser. The evetn itself is supposed
+	 * properties of the "event" fired by the browser. The event itself is supposed
 	 * to bring the proportional and derivative acceleration components. The handler
 	 * just gets the output. Typically, the Edge and Chromium fires once per mouse
-	 * scroll evetn and the amount of chnage they send depends on the used mouse. 
+	 * scroll event and the amount of change they send depends on the used mouse. 
 	 * I measure 53 for my mouse. Firefox however sends multiple events "during" the
-	 * wheel still moves and first the cummulative envent totals "53" for the same mouse.
-	 * This throttling cummulates the chnage until it reaces level 53, then it triggers
-	 * the chnage in the display
+	 * wheel still moves and first the cumulative event totals "53" for the same mouse.
+	 * This throttling cumulates the change until it reaches level 53, then it triggers
+	 * the change in the display
 	 */
 	handleScrollCustom: function() {
 		var that = chart; // Better way to do this?
