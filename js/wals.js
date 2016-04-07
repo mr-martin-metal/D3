@@ -302,6 +302,73 @@ var chart = {
 		that.updateVisibleYears();
 	},
 
+
+	handleScrollCustom_v2: function() {
+		var that = chart; // Better way to do this?
+
+		if(that.uiState.sorting) return;
+		that.scroll[1] = $(window).scrollTop();
+		//		that.uiState.selectedIndex = Math.round(that.scrollScale(scroll));
+		//		console.log("scroll=",scroll);
+		//		console.log("oldIndex - newIndex", that.uiState.selectedIndex, newIndex );
+
+		//console.log("Old scroller data:", that.scroll[0], that.scroll[1], that.scroll[2] ); 
+		that.scroll[2] -= Math.abs(that.scroll[1] - that.scroll[0]); 
+		//console.log("New scroller data:", that.scroll[0], that.scroll[1], that.scroll[2] ); 
+
+		if( that.scroll[0] < that.scroll[1]) {
+			if( (that.uiState.selectedIndex < that.data.itemCount) && ( that.scroll[2] <= 0 ) ) {
+				//console.log("Scrolling formwards long enough to jump the intex +1");
+				that.uiState.selectedIndex += 1;
+				that.scroll[2] = 57;
+				this.scrollTimer = setTimeout(function() {
+					this.scrollTimer = null;
+					//console.log("Timer scroller data:", that.scroll[0], that.scroll[1], that.scroll[2] ); 
+					window.chart.scroll[2]=0;
+				}, 500);
+			}
+		} else {
+			if( (that.uiState.selectedIndex > 0) && ( that.scroll[2] <= 0 ) ) {
+				//console.log("Scrolling backwards long enough to jump the intex -1");
+				that.uiState.selectedIndex -= 1;
+				that.scroll[2] = 57;
+				this.scrollTimer = setTimeout(function() {
+					this.scrollTimer = null;
+					//console.log("Timer scroller data:", that.scroll[0], that.scroll[1], that.scroll[2] ); 
+					window.chart.scroll[2]=0;
+				}, 500);
+			}
+		}
+
+		/*
+		if( that.scroll[1] > parseInt((that.bodyHeight - ( that.bodyHeight * 0.25 )),10) ) {
+			console.log("Moving scrollbar forwards");
+			$(window).off('scroll', that.handleScrollCustom);
+			$(window).scrollTop(4000);
+			that.scroll[1]=4000;
+			this.scrollTimer = setTimeout(function() {
+				this.scrollTimer = null;
+				$(window).on('scroll', that.handleScrollCustom);
+			}, 60);
+		}
+		if( (that.scroll[1] < 57) && (that.uiState.selectedIndex > 0)) {
+			console.log("Moving scrollbar backwards");
+			$(window).off('scroll', that.handleScrollCustom);
+			$(window).scrollTop(57);
+			that.scroll[1]=57;
+			this.scrollTimer = setTimeout(function() {
+				this.scrollTimer = null;
+				$(window).on('scroll', that.handleScrollCustom);
+			}, 60);
+		}
+		*/
+
+		//console.log("selectedIndex=", that.uiState.selectedIndex );
+		//console.log("Scroll 0 - 1 - 2 = ", that.scroll[0], that.scroll[1], that.scroll[2]);
+		that.scroll[0] = that.scroll[1];
+		that.updateVisibleYears();
+	},
+
 	/* Original handler. 
 	 * Does not throttle the scroll event. It works fine on Chromium
 	 * but is failing on other browsers.
@@ -340,7 +407,8 @@ var chart = {
 		var that = this;
 //		$(window).scroll(_.debounce(this.handleScroll, 80));
 //		$(window).scroll(this.handleScroll);
-		$(window).scroll(this.handleScrollCustom);
+//		$(window).scroll(this.handleScrollCustom);
+		$(window).scroll(this.handleScrollCustom_v2);
 //		$(window).scroll(this.handleScrollThrottled);
 //		$(window).scroll(this.handleScrollThrottled_ex);
 		$(window).on('touchmove', this.handleScroll);
@@ -516,8 +584,16 @@ var chart = {
 
 //d3.json('data/wal.data.json', function(temperatureData) {
 d3.json('data/test.json', function(temperatureData) {
+	$(window).scrollTop(1000); // scrolling beyonf the area - define a small buffer
 	chart.data = temperatureData;
 	chart.init();
 	chart.updateVisibleYears();
+	/*
+	chart.scrollResetTimer = setInterval(function() {
+				var that = window.chart;
+				console.log("Old scroller data:", that.scroll[0], that.scroll[1], that.scroll[2] ); 
+				window.chart.scroll[2] = 0;
+			}, 500);
+	*/
 });
 
