@@ -8,12 +8,14 @@ var chart = {
 	scrollTimer: null,
 	lastScrollFireTime : null,
 
-	perspectiveOffsetX: 5,
-	perspectiveOffsetY: 4.5,
+	//perspectiveOffsetX: 5,
+	//perspectiveOffsetY: 4.5,
+	perspectiveOffsetX: 3.0,
+	perspectiveOffsetY: 2.75,
 
-	chartHeight: 600,
+	chartHeight: 500,
 	lineWidth: 600,
-	lineHeight: 150,
+	lineHeight: 300,
 
 	bodyHeight: 9000, // Scroll height - small number will not scroll over the whole set of data!
 	windowHeight: 0,
@@ -47,7 +49,7 @@ var chart = {
 			var yearMin = _.min(data);
 			return {year: k, data: data, mean: yearAve, max: yearMax, min: yearMin};
 		});
-		this.data.walHistory = {data: dataset.reverse() , extent: [0, 100]}; //MM1
+		this.data.walHistory = {data: dataset.reverse() , extent: [0, 200]}; //MM1
 
 		d3.select('body').style('height', this.bodyHeight + 'px');
 		this.windowHeight = $(window).height();
